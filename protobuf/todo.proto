@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+// python3 -m grpc_tools.protoc --proto_path=protobuf --python_out=backend --grpc_python_out=backend protobuf/todo.proto  
+
+message todo {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string deadline = 4;
+  bool completed = 5;
+}
+
+message todoList {
+  repeated todo todos = 1;
+}
+
+message todoTitle {
+  string title = 1;
+}
+
+message todoId {
+  string id = 1;
+}
+
+message Empty {}
+
+// Service 
+service todoService {
+  // Create
+  rpc Addtodo (todo) returns (todo) {}
+  // Read 
+  rpc GetAll (Empty) returns (todoList) {}
+  rpc Gettodo (todoTitle) returns (todo) {}
+  // Update
+  rpc Updatetodo (todo) returns (todo) {}
+  // Delete
+  rpc Deletetodo (todoId) returns (Empty) {}
+}

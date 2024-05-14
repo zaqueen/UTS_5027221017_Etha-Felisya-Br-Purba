@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>TODOLIST</title>
+    <style>
+        body {
+            background-color: #d8e1f5;
+            font-family: 'Poppins', sans-serif;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .custom-input {
+            border: 1px solid #707f96;
+            background-color: #e7eaee;
+            height: 40px;
+            padding: 0 15px;
+            border-radius: 5px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .custom-input:focus {
+            border-color: #57637a;
+        }
+        .custom-btn {
+            background-color: #4c51bf;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .custom-btn:hover {
+            background-color: #4338ca;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="bg-gray-800 text-white p-4">
+        <div class="container flex justify-between items-center">
+            <h1 class="text-lg font-bold">TODOLIST</h1>
+            <ul class="flex space-x-8">
+                <li><a href="http://127.0.0.1:5000/" class="hover:text-gray-300">Search</a></li>
+                <li><a href="http://127.0.0.1:5000/addtodo" class="hover:text-gray-300">Add todo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold text-center">TODOLIST</h1>
+        
+        <!-- Search Bar -->
+        <div id="search" class="pt-4 mx-auto w-1/2 flex">
+            <input id="todoTitle" class="custom-input w-full text-sm focus:outline-none" type="text" name="search" placeholder="Search by Title">
+            <button type="button" onclick="gettodoByTitle()" class="custom-btn ml-2">Search</button>
+        </div>
+    
+        <!-- Display Search Result -->
+        <div class="mt-4">
+            <h2 class="text-xl font-semibold text-center">Search Result</h2>
+            <div class="overflow-x-auto mx-6 mt-4">
+                <table class="min-w-full bg-gray-200 rounded-lg">
+                    <thead class="bg-gray-300">
+                        <tr>
+                            <th class="px-4 py-2">ID</th>
+                            <th class="px-4 py-2">Title</th>
+                            <th class="px-4 py-2">Description</th>
+                            <th class="px-4 py-2">Deadline</th>
+                            <th class="px-4 py-2">Completed</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResult">
+                        <!-- Search result will appear here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="container mx-auto py-8 flex flex-col items-center" id="todos">
+            <!-- Get All todos Button -->
+            <h2 class="text-xl font-semibold">Get All todos</h2>
+            <button type="button" onclick="getAlltodos()" class="custom-btn mt-4">Get All todos</button>
+        
+            <!-- Display All todos -->
+            <div class="mt-4">
+                <h2 class="text-xl font-semibold text-center">All todos</h2>
+                <div class="overflow-x-auto mx-6 mt-4">
+                    <table class="min-w-full bg-gray-200 rounded-lg">
+                        <thead class="bg-gray-300">
+                            <tr>
+                                <th class="px-4 py-2">ID</th>
+                                <th class="px-4 py-2">Title</th>
+                                <th class="px-4 py-2">Description</th>
+                                <th class="px-4 py-2">Deadline</th>
+                                <th class="px-4 py-2">Completed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todoList">
+                            <!-- Todos will appear here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        function addtodo() {
+            var id = document.getElementById("id").value;
+            var title = document.getElementById("title").value;
+            var description = document.getElementById("description").value;
+            var deadline = document.getElementById("deadline").value;
+            var completed = document.getElementById("completed").value;
+
+            // Send request to backend server to add todo
+            fetch('/addtodo', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: id,
+                    title: title,
+                    description: description,
+                    deadline: deadline,
+                    completed: parseInt(completed)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getAlltodos() {
+            // Send request to backend server to get all todos
+            fetch('/alltodo') 
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                var todoList = document.getElementById("todoList");
+                todoList.innerHTML = "";
+                data.todos.forEach(todo => { 
+                    var row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td class="border px-4 py-2">${todo.id}</td>
+                        <td class="border px-4 py-2">${todo.title}</td>
+                        <td class="border px-4 py-2">${todo.description}</td>
+                        <td class="border px-4 py-2">${todo.deadline}</td>
+                        <td class="border px-4 py-2">${todo.completed}</td>
+                    `;
+                    todoList.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function gettodoByTitle() {
+            var todoTitle = document.getElementById("todoTitle").value;   
+            // Send request to backend server to get todo by title
+            fetch(`/todo/${todoTitle}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('todo not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                var searchResult = document.getElementById("searchResult");
+                searchResult.innerHTML = "";
+                var row = document.createElement("tr");
+                row.innerHTML = `
+                    <td class="border px-4 py-2">${data.id}</td>
+                    <td class="border px-4 py-2">${data.title}</td>
+                    <td class="border px-4 py-2">${data.description}</td>
+                    <td class="border px-4 py-2">${data.deadline}</td>
+                    <td class="border px-4 py-2">${data.completed}</td>
+                `;
+                searchResult.appendChild(row);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('todo not found');
+            });
+        }
+
+        function deletetodoById() {
+            var todoId = document.getElementById("deletetodoId").value;
+            fetch(`/deletetodo/${todoId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); 
+                alert("todo deleted successfully!");
+                getAlltodos();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Failed to delete todo.");
+            });
+        }
+        
+    </script>
+</body>
+</html>
